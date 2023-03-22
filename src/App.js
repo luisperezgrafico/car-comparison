@@ -72,28 +72,31 @@ useEffect(() => {
 }, [selectedMake1, selectedMake2]);
 
 
-useEffect(() => {
-  async function fetchYears(make, modelName) {
-    if (!make || !modelName) return;
+async function fetchYears(make, modelName) {
+  if (!make || !modelName) return;
 
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
-      );
-      // ...
-    } catch (error) {
-      console.error("Error fetching years data:", error);
-    }
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
+    );
+    console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data.years);
+    return response.data.years;
+  } catch (error) {
+    console.error("Error fetching years data:", error);
+    return [];
   }
+}
 
-  if (selectedMake1 && selectedModel1) {
-    fetchYears(selectedMake1.make_id, selectedModel1.model_name).then((years) => setYears1(years));
-  }
+ useEffect(() => {
+      if (selectedMake1 && selectedModel1) {
+        fetchYears(selectedMake1.make_id, selectedModel1.model_name).then((years) => setYears1(years));
+      }
 
-  if (selectedMake2 && selectedModel2) {
-    fetchYears(selectedMake2.make_id, selectedModel2.model_name).then((years) => setYears2(years));
-  }
-}, [selectedMake1, selectedModel1, selectedMake2, selectedModel2]);
+      if (selectedMake2 && selectedModel2) {
+        fetchYears(selectedMake2.make_id, selectedModel2.model_name).then((years) => setYears2(years));
+      }
+    }, [selectedMake1, selectedModel1, selectedMake2, selectedModel2]);
+
 
   const handleCompareClick = async () => {
   if (!selectedMake1 || !selectedModel1 || !selectedYear1 || !selectedMake2 || !selectedModel2 || !selectedYear2) {
@@ -118,39 +121,36 @@ useEffect(() => {
 };
 
 
-function renderVehicleData(vehicleData) {
-  return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Specification</TableCell>
-            <TableCell>Value</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {/* You can add more rows based on the data you want to display */}
-          <TableRow>
-            <TableCell>Make</TableCell>
-            <TableCell>{vehicleData.make_display}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Model</TableCell>
-            <TableCell>{vehicleData.model_name}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Year</TableCell>
-            <TableCell>{vehicleData.year}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Price</TableCell>
-            <TableCell>{formatNumber(vehicleData.price)}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-}
+ function renderVehicleData(vehicleData) {
+    const vehicleSpecifications = [
+      { label: 'Make', value: vehicleData.make_display },
+      { label: 'Model', value: vehicleData.model_name },
+      { label: 'Year', value: vehicleData.year },
+      { label: 'Price', value: formatNumber(vehicleData.price) },
+    ];
+
+    return (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Specification</TableCell>
+              <TableCell>Value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {vehicleSpecifications.map((spec) => (
+              <TableRow key={spec.label}>
+                <TableCell>{spec.label}</TableCell>
+                <TableCell>{spec.value}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  }
+
   return (
     <div>
       <Grid container spacing={2}>
@@ -222,17 +222,15 @@ function renderVehicleData(vehicleData) {
           </Grid>
         </Grid>
       )}
-     <Grid container spacing={2}>
-        <Grid item xs={6}>
-          {vehicleData1 && renderVehicleData(vehicleData1)}
-        </Grid>
-        <Grid item xs={6}>
-          {vehicleData2 && renderVehicleData(vehicleData2)}
-        </Grid>
+<Grid container spacing={2}>
+      <Grid item xs={6}>
+        {vehicleData1 && renderVehicleData(vehicleData1)}
       </Grid>
-    </div>
+      <Grid item xs={6}>
+        {vehicleData2 && renderVehicleData(vehicleData2)}
+      </Grid>
+    </Grid>
   );
 }
 
 export default App;
-
