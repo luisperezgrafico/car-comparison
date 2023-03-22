@@ -20,7 +20,7 @@ app.get("/api/getYears", async (req, res) => {
     const yearsData = Array.from(
       new Set(response.data.Trims.map((trim) => trim.model_year))
     ).map((year) => ({ year }));
-    res.json({ Years: yearsData });
+    res.json({ years: yearsData });
   } catch (error) {
     console.error("Error fetching years:", error);
     res.status(500).json({ error: "Failed to fetch years" });
@@ -33,7 +33,7 @@ app.get("/api/getYears", async (req, res) => {
 app.get("/api/getMakes", async (req, res) => {
   try {
     const response = await axios.get("https://www.carqueryapi.com/api/0.3/?cmd=getMakes");
-    res.json(response.data);
+    res.json({ makes: response.data.Makes });
   } catch (error) {
     console.error("Error fetching makes:", error);
     res.status(500).json({ error: "Failed to fetch makes" });
@@ -52,8 +52,8 @@ app.get("/api/getModels", async (req, res) => {
     const response = await axios.get(
       `https://www.carqueryapi.com/api/0.3/?cmd=getModels&make=${make}`
     );
-    res.json(response.data);
-  } catch (error) {
+    res.json({ models: response.data.Models });
+      } catch (error) {
     console.error("Error fetching models:", error);
     res.status(500).json({ error: "Failed to fetch models" });
   }
