@@ -47,7 +47,7 @@ function App() {
 useEffect(() => {
   async function fetchMakes() {
     try {
-      const response = await axios.get("http://localhost:5000/api/getMakes");
+      const response = await axios.get("http://localhost:5000/api/carquery/getMakes");
       setMakes(response.data.makes);
       console.log('Makes:', response.data.makes);
     } catch (error) {
@@ -64,7 +64,7 @@ useEffect(() => {
     if (!make) return [];
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/getModels?make=${make}`);
+      const response = await axios.get(`http://localhost:5000/api/carquery/getModels?make=${make}`);
       console.log(`Fetched models for make ${make}:`, response.data.models);
       return response.data.models;
     } catch (error) {
@@ -93,7 +93,7 @@ async function fetchYears(make, modelName, setYears) {
 
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
+      `http://localhost:5000/api/carquery/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
     );
     console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data); // Log the response data
     setYears(response.data); // Set the years state variable
@@ -119,12 +119,16 @@ useEffect(() => {
   async function fetchTrims(make, modelName, year, setTrims) {
     if (!make || !modelName || !year) return;
 
+    const yearAsNumber = parseInt(year, 10);
+
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/getTrims?make=${make}&model=${encodeURIComponent(modelName)}&year=${year}`
+        `http://localhost:5000/api/carquery/getTrims?make=${make}&model=${encodeURIComponent(modelName)}&year=${yearAsNumber}`
       );
       console.log(`Fetched trims for make ${make}, model ${modelName}, and year ${year}:`, response.data);
-      setTrims(response.data);
+
+      const filteredTrims = response.data.filter((trim) => trim.model_year === yearAsNumber);
+      setTrims(filteredTrims);
     } catch (error) {
       console.error("Error fetching trims data:", error);
       setTrims([]); // Set the trims state variable to an empty array
@@ -141,7 +145,6 @@ useEffect(() => {
 }, [selectedMake1, selectedModel1, selectedYear1, selectedMake2, selectedModel2, selectedYear2]);
 
 
-
 const handleCompareClick = async () => {
   if (!selectedMake1 || !selectedModel1 || !selectedYear1 || !selectedMake2 || !selectedModel2 || !selectedYear2) {
     alert("Please select both vehicles to compare.");
@@ -151,16 +154,16 @@ const handleCompareClick = async () => {
  // Fetch vehicle data for both vehicles
   try {
     const response1 = await axios.get(
-      `http://localhost:5000/api/getTrims?make=${selectedMake1?.make_id}&model=${selectedModel1?.model_name}&year=${selectedYear1?.year}`
+      `http://localhost:5000/api/carquery/getTrims?make=${selectedMake1?.make_id}&model=${selectedModel1?.model_name}&year=${selectedYear1?.year}`
     );
     console.log("Response1:", response1.data);
-    setVehicleData1(response1.data[0]); // Use the first item in the response data array
+setVehicleData1(response1.data.find(trim => trim.model_trim === selectedTrim1.model_trim));
 
     const response2 = await axios.get(
-      `http://localhost:5000/api/getTrims?make=${selectedMake2?.make_id}&model=${selectedModel2?.model_name}&year=${selectedYear2?.year}`
+      `http://localhost:5000/api/carquery/getTrims?make=${selectedMake2?.make_id}&model=${selectedModel2?.model_name}&year=${selectedYear2?.year}`
     );
     console.log("Response2:", response2.data);
-    setVehicleData2(response2.data[0]); // Use the first item in the response data array
+setVehicleData2(response2.data.find(trim => trim.model_trim === selectedTrim2.model_trim));
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
   }
