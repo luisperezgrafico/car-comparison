@@ -8,8 +8,8 @@ app.use(cors());
 app.get("/api/getYears", async (req, res) => {
   const { make_id, model } = req.query;
 
-  if (!make || !model) {
-    res.status(400).json({ error: "Missing 'make' or 'model' query parameter" });
+  if (!make_id || !model) { // Replace 'make' with 'make_id'
+    res.status(400).json({ error: "Missing 'make_id' or 'model' query parameter" });
     return;
   }
 
