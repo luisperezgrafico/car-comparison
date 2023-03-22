@@ -72,35 +72,28 @@ useEffect(() => {
 }, [selectedMake1, selectedMake2]);
 
 
-  useEffect(() => {
-async function fetchYears(make, modelName) {
-  if (!make || !modelName) return;
+useEffect(() => {
+  async function fetchYears(make, modelName) {
+    if (!make || !modelName) return;
 
-  try {
-    const response = await axios.get(
-      `http://localhost:5000/api/getYears?make_id=${make}&model_name=${encodeURIComponent(modelName)}`
-    );
-    const years = response.data.years;
-    console.log(`Fetched years for make ${make} and model ${modelName}:`, years);
-    if (make === selectedMake1?.make_id && modelName === selectedModel1?.model_name) {
-      setYears1(years);
-    } else if (make === selectedMake2?.make_id && modelName === selectedModel2?.model_name) {
-      setYears2(years);
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
+      );
+      // ...
+    } catch (error) {
+      console.error("Error fetching years data:", error);
     }
-  } catch (error) {
-    console.error("Error fetching years data:", error);
   }
-}
 
+  if (selectedMake1 && selectedModel1) {
+    fetchYears(selectedMake1.make_id, selectedModel1.model_name).then((years) => setYears1(years));
+  }
 
-    if (selectedMake1 && selectedModel1) {
-      fetchYears(selectedMake1.make_id, selectedModel1.model_name).then((years) => setYears1(years));
-    }
-
-    if (selectedMake2 && selectedModel2) {
-            fetchYears(selectedMake2.make_id, selectedModel2.model_name).then((years) => setYears2(years));
-    }
-  }, [selectedMake1, selectedModel1, selectedMake2, selectedModel2]);
+  if (selectedMake2 && selectedModel2) {
+    fetchYears(selectedMake2.make_id, selectedModel2.model_name).then((years) => setYears2(years));
+  }
+}, [selectedMake1, selectedModel1, selectedMake2, selectedModel2]);
 
   const handleCompareClick = async () => {
   if (!selectedMake1 || !selectedModel1 || !selectedYear1 || !selectedMake2 || !selectedModel2 || !selectedYear2) {

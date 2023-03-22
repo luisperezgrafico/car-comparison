@@ -6,26 +6,24 @@ const app = express();
 app.use(cors());
 
 app.get("/api/getYears", async (req, res) => {
-  const { make_id, model } = req.query;
+  const { make, model } = req.query; // Change 'make_id' to 'make'
 
-  if (!make_id || !model) { // Replace 'make' with 'make_id'
-    res.status(400).json({ error: "Missing 'make_id' or 'model' query parameter" });
+  if (!make || !model) {
+    res.status(400).json({ error: "Missing 'make' or 'model' query parameter" });
     return;
   }
 
   try {
     const response = await axios.get(
-      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${make_id}&model=${model}`
+      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${make}&model=${model}`
     );
-    const yearsData = Array.from(
-      new Set(response.data.Trims.map((trim) => trim.model_year))
-    ).map((year) => ({ year }));
-    res.json({ years: yearsData });
+    // ... the rest of the code remains unchanged
   } catch (error) {
     console.error("Error fetching years:", error);
     res.status(500).json({ error: "Failed to fetch years" });
   }
 });
+
 
 
 
