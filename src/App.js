@@ -15,8 +15,12 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 function formatNumber(num) {
-  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+  if (num === undefined || num === null) {
+    return "";
+  }
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 
 function App() {
   const [makes, setMakes] = useState([]);
@@ -90,12 +94,13 @@ async function fetchYears(make, modelName, setYears) {
       `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
     );
     console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data); // Log the response data
-    setYears(response.data.years); // Set the years state variable
+    setYears(response.data); // Set the years state variable
   } catch (error) {
     console.error("Error fetching years data:", error);
     setYears([]); // Set the years state variable to an empty array
   }
 }
+
 
 if (selectedMake1 && selectedModel1) {
   fetchYears(selectedMake1.make_id, selectedModel1.model_name, setYears1);
@@ -109,7 +114,7 @@ if (selectedMake2 && selectedModel2) {
 
 
 
-  const handleCompareClick = async () => {
+const handleCompareClick = async () => {
   if (!selectedMake1 || !selectedModel1 || !selectedYear1 || !selectedMake2 || !selectedModel2 || !selectedYear2) {
     alert("Please select both vehicles to compare.");
     return;
@@ -118,18 +123,21 @@ if (selectedMake2 && selectedModel2) {
   // Fetch vehicle data for both vehicles
   try {
     const response1 = await axios.get(
-      `http://localhost:5000/api/getVehicleData?make=${selectedMake1?.make_id}&model=${selectedModel1?.model_name}&year=${selectedYear1?.year}`
+      `http://localhost:5000/api/getTrims?make=${selectedMake1?.make_id}&model=${selectedModel1?.model_name}&year=${selectedYear1?.year}`
     );
+    console.log("Response1:", response1.data);
     setVehicleData1(response1.data);
 
     const response2 = await axios.get(
-      `http://localhost:5000/api/getVehicleData?make=${selectedMake2?.make_id}&model=${selectedModel2?.model_name}&year=${selectedYear2?.year}`
+      `http://localhost:5000/api/getTrims?make=${selectedMake2?.make_id}&model=${selectedModel2?.model_name}&year=${selectedYear2?.year}`
     );
+    console.log("Response2:", response2.data);
     setVehicleData2(response2.data);
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
   }
 };
+
 
 
 function renderVehicleData(vehicleData) {
@@ -142,6 +150,25 @@ function renderVehicleData(vehicleData) {
     { label: 'Model', value: vehicleData.model_name },
     { label: 'Year', value: vehicleData.year },
     { label: 'Price', value: formatNumber(vehicleData.price) },
+    { label: 'Body Style', value: vehicleData.body },
+    { label: 'Doors', value: vehicleData.doors },
+    { label: 'Fuel Economy (City)', value: vehicleData.fuel_city },
+    { label: 'Fuel Economy (Highway)', value: vehicleData.fuel_highway },
+    { label: 'Drive', value: vehicleData.drive },
+    { label: 'Transmission', value: vehicleData.transmission },
+    { label: 'Engine', value: vehicleData.engine },
+    { label: 'Horsepower', value: vehicleData.horsepower },
+    { label: 'Torque', value: vehicleData.torque },
+    { label: 'Fuel Type', value: vehicleData.fuel_type },
+    { label: 'Cylinders', value: vehicleData.cylinders },
+    { label: 'Weight', value: vehicleData.weight },
+    { label: 'Length', value: vehicleData.length },
+    { label: 'Width', value: vehicleData.width },
+    { label: 'Height', value: vehicleData.height },
+    { label: 'Wheelbase', value: vehicleData.wheelbase },
+    { label: 'Ground Clearance', value: vehicleData.ground_clearance },
+    { label: 'Cargo Volume', value: vehicleData.cargo_volume },
+    { label: 'Towing Capacity', value: vehicleData.towing_capacity },
   ];
 
   return (
@@ -165,6 +192,7 @@ function renderVehicleData(vehicleData) {
     </TableContainer>
   );
 }
+
 
 
   return (
@@ -226,18 +254,19 @@ function renderVehicleData(vehicleData) {
           Compare
         </Button>
       </Box>
-      {vehicleData1 && vehicleData2 && (
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Typography variant="h6">Vehicle 1</Typography>
-            {/* Render vehicleData1 content here */}
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="h6">Vehicle 2</Typography>
-            {/* Render vehicleData2 content here */}
-          </Grid>
-        </Grid>
-      )}
+{vehicleData1 && (
+  <Grid container spacing={2}>
+    <Grid item xs={6}>
+      <Typography variant="h6">Vehicle 1</Typography>
+      {renderVehicleData(vehicleData1)}
+    </Grid>
+    <Grid item xs={6}>
+      <Typography variant="h6">Vehicle 2</Typography>
+      {renderVehicleData(vehicleData2)}
+    </Grid>
+  </Grid>
+)}
+
 <Grid container spacing={2}>
       <Grid item xs={6}>
         {vehicleData1 && renderVehicleData(vehicleData1)}

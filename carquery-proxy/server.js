@@ -35,7 +35,6 @@ app.get("/api/getYears", async (req, res) => {
 
 
 
-
 app.get("/api/getMakes", async (req, res) => {
   try {
     const response = await axios.get("https://www.carqueryapi.com/api/0.3/?cmd=getMakes");
@@ -65,6 +64,29 @@ app.get("/api/getModels", async (req, res) => {
   }
 });
 
+app.get("/api/getTrims", async (req, res) => {
+  const { make, model, year } = req.query;
+
+  if (!make || !model || !year) {
+    res.status(400).json({ error: "Missing 'make', 'model', or 'year' query parameter" });
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${make}&model=${model}&year=${year}`
+    );
+
+    if (response.data && response.data.Trims) {
+      res.json(response.data.Trims);
+    } else {
+      res.status(500).json({ error: "Failed to fetch trims" });
+    }
+  } catch (error) {
+    console.error("Error fetching trims:", error);
+    res.status(500).json({ error: "Failed to fetch trims" });
+  }
+});
 
 
 const PORT = process.env.PORT || 5000;
