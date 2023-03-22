@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 app.get("/api/getYears", async (req, res) => {
-  const { make_id, model } = req.query;
+  const { make, model } = req.query;
 
   if (!make || !model) {
     res.status(400).json({ error: "Missing 'make' or 'model' query parameter" });
@@ -15,7 +15,7 @@ app.get("/api/getYears", async (req, res) => {
 
   try {
     const response = await axios.get(
-      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${make_id}&model=${model}`
+      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${make}&model=${model}`
     );
     const yearsData = Array.from(
       new Set(response.data.Trims.map((trim) => trim.model_year))
