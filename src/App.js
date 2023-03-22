@@ -78,7 +78,7 @@ async function fetchYears(make, modelName) {
 
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/getYears?make=${make}&model_name=${modelName}`
+      `http://localhost:5000/api/getYears?make_id=${make}&model_name=${modelName}`
     );
     const years = response.data.years;
     console.log(`Fetched years for make ${make} and model ${modelName}:`, years);
