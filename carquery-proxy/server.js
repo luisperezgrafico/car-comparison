@@ -36,8 +36,6 @@ app.get("/api/getYears", async (req, res) => {
 
 
 
-
-
 app.get("/api/getMakes", async (req, res) => {
   try {
     const response = await axios.get("https://www.carqueryapi.com/api/0.3/?cmd=getMakes");
