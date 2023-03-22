@@ -32,6 +32,9 @@ function App() {
   const [selectedYear2, setSelectedYear2] = useState(null);
   const [vehicleData1, setVehicleData1] = useState(null);
   const [vehicleData2, setVehicleData2] = useState(null);
+  console.log("Years1:", years1);
+  console.log("Years2:", years2);
+
 
 useEffect(() => {
   async function fetchMakes() {
@@ -79,13 +82,14 @@ async function fetchYears(make, modelName) {
     const response = await axios.get(
       `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
     );
-    console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data.years);
-    return response.data.years;
+    console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data); // Log the response data
+    return response.data.years; // Access the years array from the response
   } catch (error) {
     console.error("Error fetching years data:", error);
     return [];
   }
 }
+
 
  useEffect(() => {
       if (selectedMake1 && selectedModel1) {
@@ -172,12 +176,12 @@ async function fetchYears(make, modelName) {
             renderInput={(params) => <TextField {...params} label="Model 1" />}
           />
           <Autocomplete
-            options={years1 || []}
-            getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
-            value={selectedYear1}
-            onChange={(event, newValue) => setSelectedYear1(newValue)}
-            renderInput={(params) => <TextField {...params} label="Year 1" />}
-          />
+  options={years1 || []}
+  getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
+  value={selectedYear1}
+  onChange={(event, newValue) => setSelectedYear1(newValue)}
+  renderInput={(params) => <TextField {...params} label="Year 1" />}
+/>
         </Grid>
         <Grid item xs={6}>
           {/* Vehicle 2 Dropdowns */}
@@ -197,12 +201,12 @@ async function fetchYears(make, modelName) {
             renderInput={(params) => <TextField {...params} label="Model 2" />}
           />
           <Autocomplete
-            options={years2 || []}
-            getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
-            value={selectedYear2}
-            onChange={(event, newValue) => setSelectedYear2(newValue)}
-            renderInput={(params) => <TextField {...params} label="Year 2" />}
-          />
+  options={years2 || []}
+  getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
+  value={selectedYear2}
+  onChange={(event, newValue) => setSelectedYear2(newValue)}
+  renderInput={(params) => <TextField {...params} label="Year 2" />}
+/>
         </Grid>
       </Grid>
       <Box mt={2}>
@@ -229,7 +233,8 @@ async function fetchYears(make, modelName) {
       <Grid item xs={6}>
         {vehicleData2 && renderVehicleData(vehicleData2)}
       </Grid>
-</Grid>
+  </Grid>
+</div>
   );
 }
 
