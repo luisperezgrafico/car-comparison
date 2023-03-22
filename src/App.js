@@ -53,11 +53,11 @@ useEffect(() => {
 
 useEffect(() => {
   async function fetchModels(make) {
-    if (!make) return;
+    if (!make) return [];
 
     try {
       const response = await axios.get(`http://localhost:5000/api/getModels?make=${make}`);
-    console.log(`Fetched models for make ${make}:`, response.data.models);
+      console.log(`Fetched models for make ${make}:`, response.data.models);
       return response.data.models;
     } catch (error) {
       console.error("Error fetching models data:", error);
@@ -67,15 +67,22 @@ useEffect(() => {
 
   if (selectedMake1) {
     fetchModels(selectedMake1.make_id).then((models) => setModels1(models));
+  } else {
+    setModels1([]);
   }
 
   if (selectedMake2) {
     fetchModels(selectedMake2.make_id).then((models) => setModels2(models));
+  } else {
+    setModels2([]);
   }
 }, [selectedMake1, selectedMake2]);
 
 
-async function fetchYears(make, modelName) {
+
+
+useEffect(() => {
+async function fetchYears(make, modelName, setYears) {
   if (!make || !modelName) return;
 
   try {
@@ -83,23 +90,23 @@ async function fetchYears(make, modelName) {
       `http://localhost:5000/api/getYears?make=${make}&model=${encodeURIComponent(modelName)}`
     );
     console.log(`Fetched years for make ${make} and model ${modelName}:`, response.data); // Log the response data
-    return response.data.years; // Access the years array from the response
+    setYears(response.data.years); // Set the years state variable
   } catch (error) {
     console.error("Error fetching years data:", error);
-    return [];
+    setYears([]); // Set the years state variable to an empty array
   }
 }
 
+if (selectedMake1 && selectedModel1) {
+  fetchYears(selectedMake1.make_id, selectedModel1.model_name, setYears1);
+}
 
- useEffect(() => {
-      if (selectedMake1 && selectedModel1) {
-        fetchYears(selectedMake1.make_id, selectedModel1.model_name).then((years) => setYears1(years));
-      }
+if (selectedMake2 && selectedModel2) {
+  fetchYears(selectedMake2.make_id, selectedModel2.model_name, setYears2);
+}
 
-      if (selectedMake2 && selectedModel2) {
-        fetchYears(selectedMake2.make_id, selectedModel2.model_name).then((years) => setYears2(years));
-      }
-    }, [selectedMake1, selectedModel1, selectedMake2, selectedModel2]);
+}, [selectedMake1, selectedModel1, selectedMake2, selectedModel2, setYears1, setYears2]);
+
 
 
   const handleCompareClick = async () => {
@@ -125,35 +132,40 @@ async function fetchYears(make, modelName) {
 };
 
 
- function renderVehicleData(vehicleData) {
-    const vehicleSpecifications = [
-      { label: 'Make', value: vehicleData.make_display },
-      { label: 'Model', value: vehicleData.model_name },
-      { label: 'Year', value: vehicleData.year },
-      { label: 'Price', value: formatNumber(vehicleData.price) },
-    ];
-
-    return (
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Specification</TableCell>
-              <TableCell>Value</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {vehicleSpecifications.map((spec) => (
-              <TableRow key={spec.label}>
-                <TableCell>{spec.label}</TableCell>
-                <TableCell>{spec.value}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
+function renderVehicleData(vehicleData) {
+  if (!vehicleData) {
+    return null;
   }
+
+  const vehicleSpecifications = [
+    { label: 'Make', value: vehicleData.make_display },
+    { label: 'Model', value: vehicleData.model_name },
+    { label: 'Year', value: vehicleData.year },
+    { label: 'Price', value: formatNumber(vehicleData.price) },
+  ];
+
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Specification</TableCell>
+            <TableCell>Value</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {vehicleSpecifications.map((spec) => (
+            <TableRow key={spec.label}>
+              <TableCell>{spec.label}</TableCell>
+              <TableCell>{spec.value}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
 
   return (
     <div>
@@ -175,9 +187,9 @@ async function fetchYears(make, modelName) {
             onChange={(event, newValue) => setSelectedModel1(newValue)}
             renderInput={(params) => <TextField {...params} label="Model 1" />}
           />
-          <Autocomplete
+<Autocomplete
   options={years1 || []}
-  getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
+  getOptionLabel={(option) => (option ? option.toString() : "")}
   value={selectedYear1}
   onChange={(event, newValue) => setSelectedYear1(newValue)}
   renderInput={(params) => <TextField {...params} label="Year 1" />}
@@ -200,9 +212,9 @@ async function fetchYears(make, modelName) {
             onChange={(event, newValue) => setSelectedModel2(newValue)}
             renderInput={(params) => <TextField {...params} label="Model 2" />}
           />
-          <Autocomplete
+<Autocomplete
   options={years2 || []}
-  getOptionLabel={(option) => (option.year ? option.year.toString() : "")}
+  getOptionLabel={(option) => (option ? option.toString() : "")}
   value={selectedYear2}
   onChange={(event, newValue) => setSelectedYear2(newValue)}
   renderInput={(params) => <TextField {...params} label="Year 2" />}
