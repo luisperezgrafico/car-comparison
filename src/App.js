@@ -78,7 +78,7 @@ async function fetchYears(make, modelName) {
 
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/getYears?make=${make}&model_name=${modelName}`
+      `http://localhost:5000/api/getYears?make_id=${make}&model_name=${encodeURIComponent(modelName)}`
     );
     const years = response.data.years;
     console.log(`Fetched years for make ${make} and model ${modelName}:`, years);
@@ -172,6 +172,7 @@ function renderVehicleData(vehicleData) {
           />
           <Autocomplete
             options={models1 || []}
+            isOptionEqualToValue={(option, value) => option.model_name === value.model_name}
             getOptionLabel={(option) => option.model_name}
             value={selectedModel1}
             onChange={(event, newValue) => setSelectedModel1(newValue)}
@@ -196,6 +197,7 @@ function renderVehicleData(vehicleData) {
           />
           <Autocomplete
             options={models2 || []}
+            isOptionEqualToValue={(option, value) => option.model_name === value.model_name}
             getOptionLabel={(option) => option.model_name}
             value={selectedModel2}
             onChange={(event, newValue) => setSelectedModel2(newValue)}
