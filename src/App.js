@@ -4,7 +4,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -36,6 +35,11 @@ function App() {
   const [selectedYear2, setSelectedYear2] = useState(null);
   const [vehicleData1, setVehicleData1] = useState(null);
   const [vehicleData2, setVehicleData2] = useState(null);
+  const [trims1, setTrims1] = useState([]);
+  const [selectedTrim1, setSelectedTrim1] = useState(null);
+  const [trims2, setTrims2] = useState([]);
+  const [selectedTrim2, setSelectedTrim2] = useState(null);
+
   console.log("Years1:", years1);
   console.log("Years2:", years2);
 
@@ -83,8 +87,6 @@ useEffect(() => {
 }, [selectedMake1, selectedMake2]);
 
 
-
-
 useEffect(() => {
 async function fetchYears(make, modelName, setYears) {
   if (!make || !modelName) return;
@@ -113,6 +115,32 @@ if (selectedMake2 && selectedModel2) {
 }, [selectedMake1, selectedModel1, selectedMake2, selectedModel2, setYears1, setYears2]);
 
 
+useEffect(() => {
+  async function fetchTrims(make, modelName, year, setTrims) {
+    if (!make || !modelName || !year) return;
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/getTrims?make=${make}&model=${encodeURIComponent(modelName)}&year=${year}`
+      );
+      console.log(`Fetched trims for make ${make}, model ${modelName}, and year ${year}:`, response.data);
+      setTrims(response.data);
+    } catch (error) {
+      console.error("Error fetching trims data:", error);
+      setTrims([]); // Set the trims state variable to an empty array
+    }
+  }
+
+  if (selectedMake1 && selectedModel1 && selectedYear1) {
+    fetchTrims(selectedMake1.make_id, selectedModel1.model_name, selectedYear1.year, setTrims1);
+  }
+
+  if (selectedMake2 && selectedModel2 && selectedYear2) {
+    fetchTrims(selectedMake2.make_id, selectedModel2.model_name, selectedYear2.year, setTrims2);
+  }
+}, [selectedMake1, selectedModel1, selectedYear1, selectedMake2, selectedModel2, selectedYear2]);
+
+
 
 const handleCompareClick = async () => {
   if (!selectedMake1 || !selectedModel1 || !selectedYear1 || !selectedMake2 || !selectedModel2 || !selectedYear2) {
@@ -120,19 +148,19 @@ const handleCompareClick = async () => {
     return;
   }
 
-  // Fetch vehicle data for both vehicles
+ // Fetch vehicle data for both vehicles
   try {
     const response1 = await axios.get(
       `http://localhost:5000/api/getTrims?make=${selectedMake1?.make_id}&model=${selectedModel1?.model_name}&year=${selectedYear1?.year}`
     );
     console.log("Response1:", response1.data);
-    setVehicleData1(response1.data);
+    setVehicleData1(response1.data[0]); // Use the first item in the response data array
 
     const response2 = await axios.get(
       `http://localhost:5000/api/getTrims?make=${selectedMake2?.make_id}&model=${selectedModel2?.model_name}&year=${selectedYear2?.year}`
     );
     console.log("Response2:", response2.data);
-    setVehicleData2(response2.data);
+    setVehicleData2(response2.data[0]); // Use the first item in the response data array
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
   }
@@ -142,7 +170,7 @@ const handleCompareClick = async () => {
 
 function renderVehicleData(vehicleData) {
   if (!vehicleData) {
-    return null;
+    return <p>No vehicle data available</p>; // Display a message when no vehicle data is available
   }
 
   const vehicleSpecifications = [
@@ -222,7 +250,15 @@ function renderVehicleData(vehicleData) {
   onChange={(event, newValue) => setSelectedYear1(newValue)}
   renderInput={(params) => <TextField {...params} label="Year 1" />}
 />
-        </Grid>
+<Autocomplete
+  options={trims1 || []}
+  getOptionLabel={(option) => option.model_trim}
+  value={selectedTrim1}
+  onChange={(event, newValue) => setSelectedTrim1(newValue)}
+  renderInput={(params) => <TextField {...params} label="Trim 1" />}
+/>
+     </Grid>
+
         <Grid item xs={6}>
           {/* Vehicle 2 Dropdowns */}
           <Autocomplete
@@ -247,6 +283,13 @@ function renderVehicleData(vehicleData) {
   onChange={(event, newValue) => setSelectedYear2(newValue)}
   renderInput={(params) => <TextField {...params} label="Year 2" />}
 />
+<Autocomplete
+  options={trims2 || []}
+  getOptionLabel={(option) => option.model_trim}
+  value={selectedTrim2}
+  onChange={(event, newValue) => setSelectedTrim2(newValue)}
+  renderInput={(params) => <TextField {...params} label="Trim 2" />}
+/>
         </Grid>
       </Grid>
       <Box mt={2}>
@@ -254,19 +297,6 @@ function renderVehicleData(vehicleData) {
           Compare
         </Button>
       </Box>
-{vehicleData1 && (
-  <Grid container spacing={2}>
-    <Grid item xs={6}>
-      <Typography variant="h6">Vehicle 1</Typography>
-      {renderVehicleData(vehicleData1)}
-    </Grid>
-    <Grid item xs={6}>
-      <Typography variant="h6">Vehicle 2</Typography>
-      {renderVehicleData(vehicleData2)}
-    </Grid>
-  </Grid>
-)}
-
 <Grid container spacing={2}>
       <Grid item xs={6}>
         {vehicleData1 && renderVehicleData(vehicleData1)}
