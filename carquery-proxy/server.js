@@ -6,6 +6,8 @@ const app = express();
 
 app.use(cors());
 
+app.use(express.static('public'));
+
 app.use('/api/carquery', async (req, res) => {
   try {
     const carqueryResponse = await axios.get(`https://www.carqueryapi.com/api/0.3${req.url}`);

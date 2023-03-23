@@ -20,8 +20,6 @@ function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-app.use(express.static('public'));
-
 function App() {
   const [makes, setMakes] = useState([]);
   const [models1, setModels1] = useState([]);
