@@ -8,13 +8,14 @@ app.use(cors());
 
 app.use('/api/carquery', async (req, res) => {
   try {
-    const carqueryResponse = await axios.get(`https://www.carqueryapi.com/api/0.3/${req.url}`);
+    const carqueryResponse = await axios.get(`https://www.carqueryapi.com/api/0.3${req.url}`);
     res.json(carqueryResponse.data);
   } catch (error) {
     console.error('Error fetching CarQueryAPI data:', error);
     res.status(500).json({ error: 'Failed to fetch CarQueryAPI data' });
   }
 });
+
 
 
 app.get("/api/getYears", async (req, res) => {
